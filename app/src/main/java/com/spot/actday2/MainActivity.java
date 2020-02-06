@@ -2,14 +2,22 @@ package com.spot.actday2;
 
 import androidx.appcompat.app.AppCompatActivity;
 
+import android.app.Service;
+import android.content.ComponentName;
 import android.content.Intent;
+import android.content.ServiceConnection;
 import android.database.Cursor;
 import android.net.Uri;
 import android.os.Bundle;
+import android.os.IBinder;
+import android.os.RemoteException;
 import android.view.View;
 import android.widget.ListView;
 import android.widget.ProgressBar;
 import android.widget.SimpleCursorAdapter;
+import android.widget.Toast;
+
+import com.spot.actday4.IAdd;
 
 public class MainActivity extends AppCompatActivity {
 ProgressBar progressBar;
@@ -41,11 +49,32 @@ ProgressBar progressBar;
     }
 
     public void handleClicks(View view) {
-        DownloadTask downloadTask = new DownloadTask(progressBar);
-        downloadTask.execute("url for downloading");
 
-        /*Intent intent = new Intent("act.android.app.training");
-        intent.setClassName("com.spot.actapp","com.spot.actapp.CalendarActivity");
-        startActivity(intent);*/
+
+        /*DownloadTask downloadTask = new DownloadTask(progressBar);
+        downloadTask.execute("url for downloading");*/
+
+        Intent intent = new Intent("com.act.add");
+        intent.setClassName("com.spot.actday4","com.spot.actday4.AddService");
+        bindService(intent,serviceConnection,BIND_AUTO_CREATE);
     }
+
+    Service myAddService;
+    ServiceConnection serviceConnection = new ServiceConnection() {
+        @Override
+        public void onServiceConnected(ComponentName componentName, IBinder addBinder) {
+            try {
+               int res = IAdd.Stub.asInterface(addBinder).add(10,20);
+                Toast.makeText(MainActivity.this, "sum="+res, Toast.LENGTH_SHORT).show();
+
+            } catch (RemoteException e) {
+                e.printStackTrace();
+            }
+        }
+
+        @Override
+        public void onServiceDisconnected(ComponentName componentName) {
+
+        }
+    };
 }
